@@ -5,6 +5,7 @@
 #         regression.png, speed.png (report)
 
 library(TAF)
+library(ggplot2)
 
 mkdir("report")
 
@@ -22,42 +23,118 @@ catage$processor <- ordered(catage$processor, catage$processor)
 passmark$processor <- ordered(passmark$processor, passmark$processor)
 regression$processor <- ordered(regression$processor, regression$processor)
 
+processor.levels <- c("i7-3740QM", "i7-10875H", "i7-1165G7", "u9-285H")
+processor.labels <- c(
+  "i7-3740QM"="Dell Precision M4700\nIntel i7-3740QM",
+  "i7-10875H"="Lenovo P15 Gen 1\nIntel i7-10875H",
+  "i7-1165G7"="Dell Precision 3560\nIntel i7-1165G7",
+  "u9-285H"="Lenovo P1 Gen 8\nIntel u9-285H"
+)
+catage$processor <- factor(catage$processor, levels=processor.levels)
+passmark$processor <- factor(passmark$processor, levels=processor.levels)
+regression$processor <- factor(regression$processor, levels=processor.levels)
+
+themeBenchmark <- function()
+{
+  theme_minimal(base_size=12) +
+    theme(plot.title=element_text(face="bold", hjust=0.5,
+                                  margin=margin(b=12)),
+          axis.title.x=element_text(margin=margin(t=12)),
+          axis.title.y=element_text(margin=margin(r=12)),
+          panel.grid.major=element_line(color="grey85", linewidth=0.3),
+          panel.grid.minor=element_blank(),
+          plot.margin=margin(24, 24, 24, 24))
+}
+
 # Plot benchmark results
 taf.png("benchmark")
-z <- barplot(local~processor, passmark, main="Synthetic benchmark results",
-             xlab="", ylab="Score (PassMark single thread)")
-x1 <- z - 0.2
-x2 <- z + 0.2
-segments(x1, passmark$online, x2, passmark$online, lwd=3)
-legend("topleft", c("Local", "Online"), fill=c("gray", "white"),
-       border=c("black", "white"), lty=c(0, 1), pch=c(NA, NA), lwd=2, bty="n",
-       inset=0.02, y.intersp=1.25)
+passmark.long <- rbind(
+  data.frame(processor=passmark$processor, source="Local",
+             score=passmark$local),
+  data.frame(processor=passmark$processor, source="Online",
+             score=passmark$online)
+)
+passmark.long$source <- factor(passmark.long$source,
+                               levels=c("Local", "Online"))
+print(
+  ggplot(passmark.long, aes(x=processor, y=score, fill=source)) +
+    geom_col(position=position_dodge(width=0.8, reverse=TRUE), width=0.72) +
+    scale_fill_manual(values=c(Local="#0072B2", Online="#D55E00")) +
+    scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
+    scale_x_discrete(labels=processor.labels) +
+    coord_flip() +
+    labs(title="Synthetic benchmark results", x=NULL,
+         y="Score (PassMark single thread)", fill=NULL) +
+    themeBenchmark() +
+    theme(axis.text.y=element_text(angle=0),
+          panel.grid.major.x=element_blank(),
+          legend.position="top",
+          legend.justification="left",
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=10))
+)
 dev.off()
 
 # Plot regression results
-xlim <- c(0.9, 1.1) * range(regression$passmark)
-ylim <- c(0.95, 1.05) * range(regression$actual)
 taf.png("regression")
-plot(actual~passmark, regression, pch=19, xlim=xlim, ylim=ylim,
-     main="Actual speed vs. expectation based on synthetic benchmark",
-     xlab="Synthetic benchmark score",
-     ylab="Actual speed (model iterations / sec)")
-abline(a=0, b=regression$slope[1], lty=2)
-text(actual~passmark, regression, processor, pos=3, cex=0.8)
+regression.labels <- data.frame(
+  passmark=c(2200, 3400, 2920, 4500),
+  actual=c(27, 32.5, 51.5, 73),
+  label=unname(processor.labels[as.character(regression$processor)]),
+  hjust=c(0, 0.5, 0.5, 0.5)
+)
+print(
+  ggplot(regression, aes(x=passmark, y=actual)) +
+    geom_point(color="#0072B2", size=2.5) +
+    geom_abline(slope=regression$slope[1], intercept=0, linetype=2) +
+    geom_text(data=regression.labels,
+              aes(x=passmark, y=actual, label=label, hjust=hjust),
+              inherit.aes=FALSE, size=3.2) +
+    scale_x_continuous(limits=c(0.9, 1.1) * range(regression$passmark),
+                       expand=expansion(mult=c(0.02, 0.02))) +
+    scale_y_continuous(limits=c(0.95, 1.05) * range(regression$actual),
+                       expand=expansion(mult=c(0.02, 0.02))) +
+    labs(title="Actual speed vs. expectation based on synthetic benchmark",
+         x="Synthetic benchmark score",
+         y="Actual speed (model iterations / sec)") +
+    themeBenchmark() +
+    theme(axis.text.y=element_text(angle=90, hjust=0.5, vjust=0.5))
+)
 dev.off()
 
 # Plot speed results
 taf.png("speed")
-z <- barplot(speed~processor, catage,
-             main="Actual speed vs. expectation based on synthetic benchmark",
-             xlab="", ylab="Speed (model iterations / sec)")
-x1 <- z - 0.2
-x2 <- z + 0.2
-segments(x1, catage$expected, x2, catage$expected, lwd=3)
-legend("topleft", c("Actual",
-                    "Expectation, based on\nlocal synthetic benchmark"),
-       fill=c("gray", "white"), border=c("black", "white"), lty=c(0, 1),
-       pch=c(NA, NA), lwd=2, bty="n", inset=0.02, y.intersp=1.25)
+speed.long <- rbind(
+  data.frame(processor=catage$processor, source="Actual", speed=catage$speed),
+  data.frame(processor=catage$processor,
+             source="Expectation, based on local synthetic benchmark",
+             speed=catage$expected)
+)
+speed.long$source <- factor(
+  speed.long$source,
+  levels=c("Actual", "Expectation, based on local synthetic benchmark")
+)
+print(
+  ggplot(speed.long, aes(x=processor, y=speed, fill=source)) +
+    geom_col(position=position_dodge(width=0.8, reverse=TRUE), width=0.72) +
+    scale_fill_manual(values=c(Actual="#0072B2",
+                               `Expectation, based on local synthetic benchmark`=
+                                 "#D55E00")) +
+    scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
+    scale_x_discrete(labels=processor.labels) +
+    coord_flip() +
+    labs(title="Actual speed vs. expectation based on synthetic benchmark",
+         x=NULL, y="Speed (model iterations / sec)", fill=NULL) +
+    themeBenchmark() +
+    theme(axis.text.y=element_text(angle=0),
+          panel.grid.major.x=element_blank(),
+          legend.position="top",
+          legend.justification="left",
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=10))
+)
 dev.off()
 
 # Round tables
