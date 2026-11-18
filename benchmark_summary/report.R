@@ -59,7 +59,9 @@ passmark.long$source <- factor(passmark.long$source,
 print(
   ggplot(passmark.long, aes(x=processor, y=score, fill=source)) +
     geom_col(position=position_dodge(width=0.8, reverse=TRUE), width=0.72) +
-    scale_fill_manual(values=c(Local="#0072B2", Online="#D55E00")) +
+    scale_fill_manual(values=c(Local="#0072B2", Online="#D55E00"),
+                      breaks=c("Local", "Online"),
+                      labels=c("Local laptop", "Online average")) +
     scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
     scale_x_discrete(labels=processor.labels) +
     coord_flip() +
@@ -68,8 +70,9 @@ print(
     themeBenchmark() +
     theme(axis.text.y=element_text(angle=0),
           panel.grid.major.x=element_blank(),
-          legend.position="top",
-          legend.justification="left",
+          legend.position=c(0.98, 0.07),
+          legend.justification=c(1, 0),
+          legend.direction="vertical",
           legend.background=element_rect(fill="white", color=NA),
           legend.key=element_rect(fill="white", color=NA),
           legend.text=element_text(size=10))
@@ -78,19 +81,15 @@ dev.off()
 
 # Plot regression results
 taf.png("regression")
-regression.labels <- data.frame(
-  passmark=c(2200, 3400, 2920, 4500),
-  actual=c(27, 32.5, 51.5, 73),
-  label=unname(processor.labels[as.character(regression$processor)]),
-  hjust=c(0, 0.5, 0.5, 0.5)
-)
+regression.labels <- as.character(regression$processor)
 print(
   ggplot(regression, aes(x=passmark, y=actual)) +
+    geom_abline(slope=regression$slope[1], intercept=0, linetype=2,
+                color="#D55E00") +
     geom_point(color="#0072B2", size=2.5) +
-    geom_abline(slope=regression$slope[1], intercept=0, linetype=2) +
-    geom_text(data=regression.labels,
-              aes(x=passmark, y=actual, label=label, hjust=hjust),
-              inherit.aes=FALSE, size=3.2) +
+    geom_label(aes(label=regression.labels), vjust=-0.5, size=3.0,
+               fill="white", linewidth=0,
+               label.padding=unit(0.1, "lines")) +
     scale_x_continuous(limits=c(0.9, 1.1) * range(regression$passmark),
                        expand=expansion(mult=c(0.02, 0.02))) +
     scale_y_continuous(limits=c(0.95, 1.05) * range(regression$actual),
@@ -120,7 +119,10 @@ print(
     geom_col(position=position_dodge(width=0.8, reverse=TRUE), width=0.72) +
     scale_fill_manual(values=c(Actual="#0072B2",
                                `Expectation, based on local synthetic benchmark`=
-                                 "#D55E00")) +
+                                 "#D55E00"),
+                      breaks=c("Actual",
+                               "Expectation, based on local synthetic benchmark"),
+                      labels=c("Actual", "Expected")) +
     scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
     scale_x_discrete(labels=processor.labels) +
     coord_flip() +
@@ -129,8 +131,9 @@ print(
     themeBenchmark() +
     theme(axis.text.y=element_text(angle=0),
           panel.grid.major.x=element_blank(),
-          legend.position="top",
-          legend.justification="left",
+          legend.position=c(0.98, 0.07),
+          legend.justification=c(1, 0),
+          legend.direction="vertical",
           legend.background=element_rect(fill="white", color=NA),
           legend.key=element_rect(fill="white", color=NA),
           legend.text=element_text(size=10))
