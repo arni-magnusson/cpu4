@@ -6,66 +6,152 @@ means <- function(x)
   c(freq, temp, fan)
 }
 
-plot_comparison <- function(machines, state, variable, main=NULL,
-                            xlab="Iteration", ylab="", pch=1, lwd=1.5,
-                            col=c(6,2,4,3), type="p", ...)
+processor.order <- c("p1gen8", "p3560", "p15gen1", "m4700")
+processor.labels <- c(
+  "p1gen8"="Lenovo P1 Gen 8\nIntel u9-285H",
+  "p3560"="Dell Precision 3560\nIntel i7-1165G7",
+  "p15gen1"="Lenovo P15 Gen 1\nIntel i7-10875H",
+  "m4700"="Dell Precision M4700\nIntel i7-3740QM"
+)
+processor.colors <- c(
+  "p1gen8"="#009E73",
+  "p3560"="#0072B2",
+  "p15gen1"="#D55E00",
+  "m4700"="#CC79A7"
+)
+state.order <- c("idle", "single", "main", "full")
+state.legend.order <- rev(state.order)
+state.colors <- c(
+  idle="#999999",
+  single="#D55E00",
+  main="#0072B2",
+  full="#009E73"
+)
+variable.order <- c("Freq", "Temp", "Fan")
+
+themeCPUMon <- function()
 {
-  # Prepare variable and variable1
-  variable <- gsub("[0-9]", "", variable)  # Freq
-  variable1 <- paste0(variable, "1")       # Freq1
-
-  # Extract data
-  x <- sapply(machines, `[`, state)
-  x <- sapply(x, `[`, variable1)
-  names(x) <- names(machines)
-
-  # Prepare plot elements
-  k <- length(x)
-  col <- rep(col, length=k)
-  xlim <- c(0, max(sapply(x, length)))
-  ylim <- lim(unlist(x))
-  if(is.null(main))
-    main <- paste0(variable, " (", state, ")")
-
-  # Plot
-  plot(NA, xlim=xlim, ylim=ylim, main=main, xlab=xlab, ylab=ylab, ...)
-  for(i in 1:k)
-    points(x[[i]], pch=pch, lwd=lwd, col=col[i], type=type)
-  legend("bottomleft", rev(names(x)), pch=pch, pt.lwd=lwd, col=rev(col),
-         bty="n", inset=0.02, y.intersp=1.25)
+  theme_minimal(base_size=12) +
+    theme(plot.title=element_text(face="bold", hjust=0.5,
+                                  margin=margin(b=12)),
+          axis.title.x=element_text(margin=margin(t=12)),
+          axis.title.y=element_text(margin=margin(r=12)),
+          axis.text.y=element_text(angle=90, hjust=0.5, vjust=0.5),
+          panel.grid.major=element_line(color="grey85", linewidth=0.3),
+          panel.grid.minor=element_blank(),
+          plot.margin=margin(24, 24, 24, 24),
+          strip.text=element_text(face="bold"))
 }
 
-plot_cores <- function(machine, main=tail(as.character(substitute(machine)), 1),
-                       xlab="Core", ylab="Freq", lwd=1.5, col=c(8,1,4,5), ...)
+sensor_data <- function(machines)
 {
-  plot(NA, xlim=c(1,nrow(machine)), ylim=lim(unlist(machine)), main=main,
-       xlab=xlab, ylab=ylab, xaxt="n", ...)
-  axis(1, 1:nrow(machine))
-  matlines(machine, lty=1, type="o", pch=16, lwd=lwd, col=col)
-  legend("bottomleft", rev(names(machine)), lwd=lwd, col=rev(col),
-         bty="n", inset=0.02, y.intersp=1.25)
+  data <- list()
+  for(machine in processor.order)
+    for(state in state.order)
+      for(variable in variable.order)
+      {
+        value <- machines[[machine]][[state]][[paste0(variable, "1")]]
+        data[[length(data)+1]] <- data.frame(
+          iteration=seq_along(value),
+          value=value,
+          machine=machine,
+          state=state,
+          variable=variable
+        )
+      }
+
+  data <- do.call(rbind, data)
+  data$machine <- factor(data$machine, levels=processor.order)
+  data$state <- factor(data$state, levels=state.order)
+  data$variable <- factor(data$variable, levels=variable.order)
+  data
 }
 
-plot_machine <- function(machine, variable,
-                         main=paste(deparse(substitute(machine)), variable),
-                         xlab="Iteration", ylab="", pch=1, lwd=1.5,
-                         col=c(8,1,4,5), type="p", ...)
+plot_comparison <- function(machines)
 {
-  # Prepare variable and variable1
-  variable <- gsub("[0-9]", "", variable)  # Freq
-  variable1 <- paste0(variable, "1")       # Freq1
+  data <- sensor_data(machines)
+  panel.levels <- unlist(lapply(variable.order, function(variable)
+    paste0(variable, " (", state.order, ")")))
+  data$panel <- factor(paste0(data$variable, " (", data$state, ")"),
+                       levels=panel.levels)
 
-  # Prepare plot elements
-  k <- length(machine)
-  col <- rep(col, length=k)
-  xlim <- c(0, 300)
-  ylim <- lim(unlist(lapply(machine, `[[`, variable1)))
+  ggplot(data, aes(x=iteration, y=value, color=machine)) +
+    geom_point(size=0.8, alpha=0.65) +
+    facet_wrap(vars(panel), ncol=4, scales="free_y") +
+    scale_color_manual(values=processor.colors,
+                       breaks=processor.order,
+                       labels=processor.labels) +
+    scale_x_continuous(limits=c(0, 300), breaks=seq(0, 300, 50),
+                       expand=expansion(mult=c(0, 0))) +
+    labs(x="Iteration", y=NULL, color=NULL) +
+    themeCPUMon() +
+    theme(legend.position="right",
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=8),
+          strip.text=element_text(face="bold", size=10))
+}
 
-  plot(NA, xlim=xlim, ylim=ylim, main=main, xlab=xlab, ylab=ylab, ...)
-  for(i in 1:k)
-    points(machine[[i]][[variable1]], pch=pch, lwd=lwd, col=col[i], type=type)
-  legend("bottomleft", rev(names(machine)), pch=pch, pt.lwd=lwd, col=rev(col),
-         bty="n", inset=0.02, y.intersp=1.25)
+plot_cores <- function(cores)
+{
+  data <- list()
+  for(machine in processor.order)
+  {
+    values <- as.matrix(cores[[machine]])
+    for(state in state.order)
+      data[[length(data)+1]] <- data.frame(
+        core=seq_len(nrow(values)),
+        value=values[, state],
+        machine=machine,
+        state=state
+      )
+  }
+
+  data <- do.call(rbind, data)
+  data$machine <- factor(data$machine, levels=processor.order)
+  data$state <- factor(data$state, levels=state.order)
+
+  ggplot(data, aes(x=core, y=value, color=state, group=state)) +
+    geom_line(linewidth=0.7) +
+    geom_point(size=2, show.legend=FALSE) +
+    facet_wrap(vars(machine), ncol=1, scales="free",
+               labeller=as_labeller(processor.labels)) +
+    scale_color_manual(values=state.colors, breaks=state.legend.order) +
+    scale_x_continuous(breaks=1:16, expand=expansion(mult=c(0.02, 0.02))) +
+    scale_y_continuous(expand=expansion(mult=c(0.02, 0.1))) +
+    labs(x="Core", y="Freq", color=NULL) +
+    themeCPUMon() +
+    theme(legend.position="right",
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=10))
+}
+
+plot_each <- function(machines)
+{
+  data <- sensor_data(machines)
+  panel.levels <- unlist(lapply(processor.order, function(machine)
+    paste(machine, variable.order, sep="|")))
+  panel.labels <- unlist(lapply(processor.order, function(machine)
+    paste0(processor.labels[[machine]], " | ", variable.order)))
+  data$panel <- factor(paste(data$machine, data$variable, sep="|"),
+                       levels=panel.levels,
+                       labels=panel.labels)
+
+  ggplot(data, aes(x=iteration, y=value, color=state)) +
+    geom_point(shape=1, size=1, alpha=0.65, stroke=0.5) +
+    facet_wrap(vars(panel), ncol=3, scales="free_y") +
+    scale_color_manual(values=state.colors, breaks=state.legend.order) +
+    scale_x_continuous(limits=c(0, 300), breaks=seq(0, 300, 50),
+                       expand=expansion(mult=c(0, 0))) +
+    scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
+    labs(x="Iteration", y=NULL, color=NULL) +
+    themeCPUMon() +
+    theme(legend.position="right",
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=9),
+          strip.text=element_text(face="bold", size=9))
 }
 
 remove_first <- function(x, burn=0, length=300)

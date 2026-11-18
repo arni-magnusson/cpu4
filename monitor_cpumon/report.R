@@ -6,6 +6,7 @@
 # After:  comparison.png, cores.png, desc.csv, each.png, summary.csv (report)
 
 library(TAF)
+library(ggplot2)
 source("utilities.R")
 
 mkdir("report")
@@ -20,49 +21,22 @@ p3560 <- readRDS("model/p3560.rds")
 summary <- read.taf("output/summary.csv")
 
 # Prepare plot elements
-machines <- list(m4700=m4700, p15gen1=p15gen1, p3560=p3560, p1gen8=p1gen8)
+machines <- list(p1gen8=p1gen8, p3560=p3560,
+                 p15gen1=p15gen1, m4700=m4700)
 
 # Plot machine comparison
 taf.png("comparison", 3600, 2400, res=300)
-par(mfrow=c(3,4))
-plot_comparison(machines, "idle", "Freq")
-plot_comparison(machines, "single", "Freq")
-plot_comparison(machines, "main", "Freq")
-plot_comparison(machines, "full", "Freq")
-plot_comparison(machines, "idle", "Temp")
-plot_comparison(machines, "single", "Temp")
-plot_comparison(machines, "main", "Temp")
-plot_comparison(machines, "full", "Temp")
-plot_comparison(machines, "idle", "Fan")
-plot_comparison(machines, "single", "Fan")
-plot_comparison(machines, "main", "Fan")
-plot_comparison(machines, "full", "Fan")
+print(plot_comparison(machines))
 dev.off()
 
 # Plot cores
-taf.png("cores", 1600, 1600)
-par(mfrow=c(2,2))
-plot_cores(cores$m4700)
-plot_cores(cores$p1gen8)
-plot_cores(cores$p15gen1)
-plot_cores(cores$p3560)
+taf.png("cores", 2400, 3200, res=300)
+print(plot_cores(cores))
 dev.off()
 
 # Plot each machine
-taf.png("each", 3600, 2400, res=300)
-par(mfrow=c(3,4))
-plot_machine(m4700, "Freq")
-plot_machine(p15gen1, "Freq")
-plot_machine(p3560, "Freq")
-plot_machine(p1gen8, "Freq")
-plot_machine(m4700, "Temp")
-plot_machine(p15gen1, "Temp")
-plot_machine(p3560, "Temp")
-plot_machine(p1gen8, "Temp")
-plot_machine(m4700, "Fan")
-plot_machine(p15gen1, "Fan")
-plot_machine(p3560, "Fan")
-plot_machine(p1gen8, "Fan")
+taf.png("each", 3600, 3200, res=300)
+print(plot_each(machines))
 dev.off()
 
 # Round and divide values
