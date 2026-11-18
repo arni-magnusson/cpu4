@@ -14,12 +14,13 @@ catage <- read.taf("output/catage.csv")
 # Order machines from oldest to newest so the newest appears at the top
 catage$machine <- factor(catage$machine,
                          levels=c("m4700", "p15gen1", "p3560", "p1gen8"))
+catage$job <- factor(catage$job, levels=c("short", "sustained"))
 
 # Plot
 taf.png("speed")
 print(
   ggplot(catage, aes(x=speed, y=machine, fill=job)) +
-    geom_col(position=position_dodge(width=0.8), width=0.72, color="black") +
+    geom_col(position=position_dodge(width=0.8, reverse=TRUE), width=0.72) +
     scale_fill_manual(values=c(short="#0072B2", sustained="#D55E00"),
                       breaks=c("short", "sustained"),
                       labels=c("Short", "Sustained")) +

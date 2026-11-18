@@ -54,28 +54,24 @@ dev.off()
 # Effective cores
 effective <- rbind(
   data.frame(machine=passmark$machine, cores=passmark$physcores,
-             type="Physical"),
+             type="Physical cores"),
   data.frame(machine=passmark$machine, cores=passmark$effcores,
              type="Effective index")
 )
 effective$type <- factor(effective$type,
-                        levels=c("Physical", "Effective index"))
+                        levels=c("Physical cores", "Effective index"))
 taf.png("effective_cores")
 print(
-  ggplot(effective, aes(x=cores, y=machine, fill=type, color=type)) +
+  ggplot(effective, aes(x=cores, y=machine, fill=type)) +
     geom_col(position="identity", width=0.72) +
-    scale_fill_manual(values=c(Physical="white",
+    scale_fill_manual(values=c(`Physical cores`="#E5C4AC",
                                `Effective index`=
                                  unname(benchmark.colors["orange"])),
-                      breaks=c("Physical", "Effective index")) +
-    scale_color_manual(values=c(Physical=unname(benchmark.colors["blue"]),
-                                `Effective index`=
-                                  unname(benchmark.colors["orange"])),
-                       breaks=c("Physical", "Effective index")) +
+                      breaks=c("Physical cores", "Effective index")) +
     scale_x_continuous(expand=expansion(mult=c(0, 0.1))) +
     scale_y_discrete(labels=machine.labels) +
     labs(title="Effective core index = multithread score / single-thread score",
-         x="Number of cores", y=NULL, fill=NULL, color=NULL) +
+         x="Cores", y=NULL, fill=NULL) +
     themeBenchmark() +
     theme(legend.position=c(0.98, 0.02),
           legend.justification=c(1, 0),
@@ -90,9 +86,12 @@ dev.off()
 # Memory
 memory <- merge(memory.details, info[c("machine", "module", "year")])
 memory$machine <- factor(memory$machine, levels=machine.levels)
-memory.labels <- setNames(
-  paste0(info$name, " (", info$year, ")\n", processor.labels, ", ",
-         info$module),
+memory.benchmark.labels <- setNames(
+  paste0(info$name, "\n", info$module, " (", info$year, ")"),
+  info$machine
+)
+memory.detail.labels <- setNames(
+  paste0(info$module, " (", info$year, ")"),
   info$machine
 )
 
@@ -101,13 +100,12 @@ print(
   ggplot(memory, aes(x=memory, y=machine)) +
     geom_col(width=0.72, fill=benchmark.colors["blue"]) +
     scale_x_continuous(expand=expansion(mult=c(0, 0.1))) +
-    scale_y_discrete(labels=memory.labels) +
+    scale_y_discrete(labels=memory.benchmark.labels) +
     labs(title="Memory benchmark", x="Score", y=NULL) +
     themeBenchmark()
 )
 dev.off()
 
-taf.png("memory_details", 1600, 3600)
 memory.metrics <- rbind(
   data.frame(machine=memory$machine, metric="read", score=memory$read),
   data.frame(machine=memory$machine, metric="write", score=memory$write),
@@ -115,19 +113,20 @@ memory.metrics <- rbind(
 )
 memory.metrics$metric <- factor(memory.metrics$metric,
                                 levels=c("read", "write", "latency"))
+taf.png("memory_details")
 print(
   ggplot(memory.metrics, aes(x=score, y=machine, fill=metric)) +
     geom_col(width=0.72, show.legend=FALSE) +
-    scale_fill_manual(values=c(read=unname(benchmark.colors["blue"]),
+    scale_fill_manual(values=c(read="#CC79A7",
                                write=unname(benchmark.colors["orange"]),
                                latency=unname(benchmark.colors["green"]))) +
     scale_x_continuous(expand=expansion(mult=c(0, 0.1))) +
-    scale_y_discrete(labels=memory.labels) +
+    scale_y_discrete(labels=memory.detail.labels) +
     facet_wrap(~metric, ncol=1, scales="free_x",
-               labeller=as_labeller(c(read="Memory (read)",
-                                      write="Memory (write)",
-                                      latency="Memory (latency)"))) +
-    labs(x="Score", y=NULL) +
+               labeller=as_labeller(c(read="Read (MB/s)",
+                                      write="Write (MB/s)",
+                                      latency="Latency (ns)"))) +
+    labs(x=NULL, y=NULL) +
     themeBenchmark() +
     theme(strip.text=element_text(face="bold"),
           strip.background=element_blank())
