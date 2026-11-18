@@ -26,7 +26,8 @@ history.nodes <- aggregate(Date ~ Company + nm, history, min)
 taf.png("history_companies_nm", width=1200)
 print(
   ggplot(history, aes(x=Date, y=nm, color=Company)) +
-    geom_line(data=history.nodes, aes(group=Company), linewidth=0.8) +
+    geom_line(data=history.nodes, aes(group=Company), linewidth=0.8,
+              show.legend=FALSE) +
     geom_point(size=2) +
     scale_color_manual(values=benchmark.colors[c("Intel", "AMD")],
                        breaks=c("Intel", "AMD")) +

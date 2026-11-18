@@ -84,10 +84,11 @@ taf.png("companies_macbook", width=1200)
 print(
   ggplot(apple, aes(x=Date, y=Speed, color=Type, shape=Type)) +
     geom_point(size=2.2) +
-    scale_color_manual(values=c(Pro="#0072B2", Air="#D55E00")) +
+    scale_color_manual(values=c(Pro=benchmark.colors[["Apple"]],
+                                Air=benchmark.colors[["Apple"]])) +
     scale_shape_manual(values=c(Pro=16, Air=1)) +
     scale_y_log10() +
-    labs(title="Apple MacBook", x=NULL, y=score, color=NULL, shape=NULL) +
+    labs(title="MacBook", x=NULL, y=score, color=NULL, shape=NULL) +
     themeBenchmark() +
     theme(legend.position=c(0.02, 0.98),
           legend.justification=c(0, 1),
