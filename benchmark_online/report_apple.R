@@ -73,7 +73,8 @@ print(
     labs(title="Lag until company reaches the CPU performance of the best company",
          x=NULL, y="Lag (yrs)") +
     themeBenchmark() +
-    theme(panel.grid.major.x=element_blank())
+    theme(panel.grid.major.x=element_blank(),
+          panel.grid.major.y=element_blank())
 )
 dev.off()
 

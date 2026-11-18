@@ -11,7 +11,8 @@ themeBenchmark <- function()
                                                      vjust=0.5),
                    panel.grid.major.x=ggplot2::element_line(
                      color="grey85", linewidth=0.3),
-                   panel.grid.major.y=ggplot2::element_blank(),
+                   panel.grid.major.y=ggplot2::element_line(
+                     color="grey85", linewidth=0.3),
                    panel.grid.minor=ggplot2::element_blank(),
                    plot.margin=ggplot2::margin(24, 24, 24, 24))
 }
@@ -27,5 +28,6 @@ implot <- function(x, title, color)
     ggplot2::scale_y_discrete(labels=setNames(labels, levels(x$Model))) +
     ggplot2::labs(title=title, x="Speed improvement (%)", y=NULL) +
     themeBenchmark() +
-    ggplot2::theme(axis.text.y=ggplot2::element_text(angle=0))
+    ggplot2::theme(axis.text.y=ggplot2::element_text(angle=0),
+                   panel.grid.major.y=ggplot2::element_blank())
 }
