@@ -1,3 +1,17 @@
+themeBenchmark <- function()
+{
+  ggplot2::theme_minimal(base_size=12) +
+    ggplot2::theme(plot.title=ggplot2::element_text(face="bold", hjust=0.5,
+                                                   margin=ggplot2::margin(b=12)),
+                   axis.title.x=ggplot2::element_text(
+                     margin=ggplot2::margin(t=12)),
+                   panel.grid.major.x=ggplot2::element_line(
+                     color="grey85", linewidth=0.3),
+                   panel.grid.major.y=ggplot2::element_blank(),
+                   panel.grid.minor=ggplot2::element_blank(),
+                   plot.margin=ggplot2::margin(24, 24, 24, 24))
+}
+
 readPass <- function(file)
 {
   # Read text

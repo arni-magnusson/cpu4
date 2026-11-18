@@ -5,6 +5,7 @@
 #         memory_benchmark.png, memory_details.png (report)
 
 library(TAF)
+library(ggplot2)
 
 mkdir("report")
 
@@ -13,57 +14,122 @@ info <- read.taf("data/info.csv")
 memory.details <- read.taf("data/passmark.csv")
 passmark <- read.taf("output/passmark.csv")
 
-# Single thread
-single <- passmark[order(passmark$single),]
+# Establish processor order and labels
+machine.levels <- c("m4700", "p15gen1", "p3560", "p1gen8")
+processor.labels <- setNames(paste("Intel", gsub(" ", "-", info$processor)),
+                             info$machine)
+machine.labels <- setNames(paste(info$name, processor.labels, sep="\n"),
+                           info$machine)
+passmark$machine <- factor(passmark$machine, levels=machine.levels)
+benchmark.colors <- c(blue="#0072B2", orange="#D55E00", green="#009E73")
+
+# Single-thread benchmark
+single <- passmark
 taf.png("cpu_benchmark")
-barplot(single$single, names=single$machine,
-        main="Single-thread benchmark", xlab="",
-        ylab="Score (PassMark single thread)")
+print(
+  ggplot(single, aes(x=single, y=machine)) +
+    geom_col(width=0.72, fill=benchmark.colors["blue"]) +
+    scale_x_continuous(expand=expansion(mult=c(0, 0.1))) +
+    scale_y_discrete(labels=machine.labels) +
+    labs(title="Single-thread benchmark",
+         x="Score (PassMark single thread)", y=NULL) +
+    themeBenchmark()
+)
 dev.off()
 
-# Multithread
-multi <- passmark[order(passmark$multi),]
+# Multithread benchmark
+multi <- passmark
 taf.png("cpu_multicore")
-barplot(multi$multi, names=multi$machine,
-        main="Multithread benchmark", xlab="",
-        ylab="Score (PassMark multithread)")
+print(
+  ggplot(multi, aes(x=multi, y=machine)) +
+    geom_col(width=0.72, fill=benchmark.colors["orange"]) +
+    scale_x_continuous(expand=expansion(mult=c(0, 0.1))) +
+    scale_y_discrete(labels=machine.labels) +
+    labs(title="Multithread benchmark",
+         x="Score (PassMark multithread)", y=NULL) +
+    themeBenchmark()
+)
 dev.off()
 
 # Effective cores
-effective <- passmark[order(passmark$effcores),]
+effective <- rbind(
+  data.frame(machine=passmark$machine, cores=passmark$physcores,
+             type="Physical"),
+  data.frame(machine=passmark$machine, cores=passmark$effcores,
+             type="Effective index")
+)
+effective$type <- factor(effective$type,
+                        levels=c("Physical", "Effective index"))
 taf.png("effective_cores")
-barplot(effective$physcores, names=effective$machine, col=0,
-        ylab="Number of cores")
-barplot(effective$effcores, col="lightgray", add=TRUE)
-legend("topleft", legend=c("Physical", "Effective index"),
-       fill=c("white","lightgray"), bty="n", inset=0.02, y.intersp=1.25)
-title(main="Effective core index = multithread score / single-thread score")
+print(
+  ggplot(effective, aes(x=cores, y=machine, fill=type, color=type)) +
+    geom_col(position="identity", width=0.72) +
+    scale_fill_manual(values=c(Physical="white",
+                               `Effective index`=
+                                 unname(benchmark.colors["orange"])),
+                      breaks=c("Physical", "Effective index")) +
+    scale_color_manual(values=c(Physical=unname(benchmark.colors["blue"]),
+                                `Effective index`=
+                                  unname(benchmark.colors["orange"])),
+                       breaks=c("Physical", "Effective index")) +
+    scale_x_continuous(expand=expansion(mult=c(0, 0.1))) +
+    scale_y_discrete(labels=machine.labels) +
+    labs(title="Effective core index = multithread score / single-thread score",
+         x="Number of cores", y=NULL, fill=NULL, color=NULL) +
+    themeBenchmark() +
+    theme(legend.position=c(0.98, 0.02),
+          legend.justification=c(1, 0),
+          legend.direction="vertical",
+          legend.text=element_text(size=10),
+          legend.key.spacing.y=grid::unit(0.08, "cm"),
+          legend.background=element_rect(fill="white", color=NA),
+          legend.box.background=element_blank())
+)
 dev.off()
 
 # Memory
 memory <- merge(memory.details, info[c("machine", "module", "year")])
-memory <- memory[order(memory$memory),]
-memory <- memory[c("machine", "memory", "database", "readcache", "read",
-                   "write", "available", "latency", "threaded", "module",
-                   "year")]
-labels <- paste0(memory$machine, "\n(", memory$module, ")\n", memory$year)
+memory$machine <- factor(memory$machine, levels=machine.levels)
+memory.labels <- setNames(
+  paste0(info$name, " (", info$year, ")\n", processor.labels, ", ",
+         info$module),
+  info$machine
+)
 
 taf.png("memory_benchmark")
-mgp <- c(3, 2.3, 0)
-barplot(memory$memory, names=labels, main="Memory benchmark", xlab="",
-        ylab="Score", yaxt="n", mgp=mgp)
-axis(2)
+print(
+  ggplot(memory, aes(x=memory, y=machine)) +
+    geom_col(width=0.72, fill=benchmark.colors["blue"]) +
+    scale_x_continuous(expand=expansion(mult=c(0, 0.1))) +
+    scale_y_discrete(labels=memory.labels) +
+    labs(title="Memory benchmark", x="Score", y=NULL) +
+    themeBenchmark()
+)
 dev.off()
 
 taf.png("memory_details", 1600, 3600)
-par(mfrow=c(3,1))
-barplot(memory$read, names=labels, main="Memory (read)", xlab="", col=7,
-        ylab="Score", yaxt="n", mgp=mgp)
-axis(2)
-barplot(memory$write, names=labels, main="Memory (write)", xlab="", col=2,
-        ylab="Score", yaxt="n", mgp=mgp)
-axis(2)
-barplot(memory$latency, names=labels, main="Memory (latency)", xlab="", col=3,
-        ylab="Score", yaxt="n", mgp=mgp)
-axis(2)
+memory.metrics <- rbind(
+  data.frame(machine=memory$machine, metric="read", score=memory$read),
+  data.frame(machine=memory$machine, metric="write", score=memory$write),
+  data.frame(machine=memory$machine, metric="latency", score=memory$latency)
+)
+memory.metrics$metric <- factor(memory.metrics$metric,
+                                levels=c("read", "write", "latency"))
+print(
+  ggplot(memory.metrics, aes(x=score, y=machine, fill=metric)) +
+    geom_col(width=0.72, show.legend=FALSE) +
+    scale_fill_manual(values=c(read=unname(benchmark.colors["blue"]),
+                               write=unname(benchmark.colors["orange"]),
+                               latency=unname(benchmark.colors["green"]))) +
+    scale_x_continuous(expand=expansion(mult=c(0, 0.1))) +
+    scale_y_discrete(labels=memory.labels) +
+    facet_wrap(~metric, ncol=1, scales="free_x",
+               labeller=as_labeller(c(read="Memory (read)",
+                                      write="Memory (write)",
+                                      latency="Memory (latency)"))) +
+    labs(x="Score", y=NULL) +
+    themeBenchmark() +
+    theme(strip.text=element_text(face="bold"),
+          strip.background=element_blank())
+)
 dev.off()
