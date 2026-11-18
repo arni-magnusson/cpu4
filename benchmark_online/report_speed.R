@@ -30,7 +30,7 @@ plot.speed <- function(data, title)
 {
   ggplot(data, aes(x=Date, y=Speed, color=Company, group=Series)) +
     geom_line(linewidth=0.8) +
-    geom_point(shape=1, size=2) +
+    geom_point(shape=1, size=2, show.legend=FALSE) +
     scale_color_manual(values=benchmark.colors[c("Intel", "AMD")],
                        breaks=intersect(c("Intel", "AMD"), unique(data$Company))) +
     scale_x_date(limits=as.Date(c("2010-01-01", "2027-01-01")),
@@ -39,7 +39,7 @@ plot.speed <- function(data, title)
     scale_y_log10(limits=c(700, 4400),
                   breaks=c(1000, 2000, 3000, 4000),
                   expand=expansion(mult=0)) +
-    labs(title=title, x="Date", y=score, color=NULL) +
+    labs(title=title, x=NULL, y=score, color=NULL) +
     themeBenchmark() +
     theme(legend.position=c(0.02, 0.98),
           legend.justification=c(0, 1),

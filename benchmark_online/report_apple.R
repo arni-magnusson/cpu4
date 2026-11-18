@@ -29,10 +29,10 @@ print(
     scale_color_manual(values=benchmark.colors,
                        breaks=c("Apple", "Intel", "AMD")) +
     scale_y_log10() +
-    labs(title="Processor performance by company", x="Date", y=score,
+    labs(title="Processor performance by company", x=NULL, y=score,
          color=NULL) +
     themeBenchmark() +
-    theme(legend.position=c(0.02, 0.98),
+    theme(legend.position=c(0.08, 0.98),
           legend.justification=c(0, 1),
           legend.background=element_rect(fill="white", color=NA),
           legend.key=element_rect(fill="white", color=NA),
@@ -44,15 +44,15 @@ dev.off()
 taf.png("companies_fit", width=1200)
 print(
   ggplot(companies, aes(x=Date, y=Speed, color=Company)) +
-    geom_line(data=companies.fit, linewidth=1) +
+    geom_line(data=companies.fit, linewidth=1, show.legend=FALSE) +
     geom_point(size=2) +
     scale_color_manual(values=benchmark.colors,
                        breaks=c("Apple", "Intel", "AMD")) +
     scale_y_log10() +
-    labs(title="Processor performance by company", x="Date", y=score,
+    labs(title="Processor performance by company", x=NULL, y=score,
          color=NULL) +
     themeBenchmark() +
-    theme(legend.position=c(0.02, 0.98),
+    theme(legend.position=c(0.08, 0.98),
           legend.justification=c(0, 1),
           legend.background=element_rect(fill="white", color=NA),
           legend.key=element_rect(fill="white", color=NA),
@@ -72,7 +72,8 @@ print(
     scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
     labs(title="Lag until company reaches the CPU performance of the best company",
          x=NULL, y="Lag (yrs)") +
-    themeBenchmark()
+    themeBenchmark() +
+    theme(panel.grid.major.x=element_blank())
 )
 dev.off()
 
@@ -86,7 +87,7 @@ print(
     scale_color_manual(values=c(Pro="#0072B2", Air="#D55E00")) +
     scale_shape_manual(values=c(Pro=16, Air=1)) +
     scale_y_log10() +
-    labs(title="Apple MacBook", x="Date", y=score, color=NULL, shape=NULL) +
+    labs(title="Apple MacBook", x=NULL, y=score, color=NULL, shape=NULL) +
     themeBenchmark() +
     theme(legend.position=c(0.02, 0.98),
           legend.justification=c(0, 1),

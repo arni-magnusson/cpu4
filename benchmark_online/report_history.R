@@ -35,11 +35,11 @@ print(
                            130, 180),
                   labels=round(c(3, 4, 5.8, 7.2, 10, 14, 22, 28, 35, 45,
                                 65, 90, 130, 180))) +
-    labs(title="Semiconductor technology over time", x="Date",
+    labs(title="Semiconductor technology over time", x=NULL,
          y="Process node (nm)", color=NULL) +
     themeBenchmark() +
-    theme(legend.position=c(0.02, 0.98),
-          legend.justification=c(0, 1),
+    theme(legend.position=c(0.98, 0.98),
+          legend.justification=c(1, 1),
           legend.background=element_rect(fill="white", color=NA),
           legend.key=element_rect(fill="white", color=NA),
           legend.text=element_text(size=10))
@@ -54,7 +54,7 @@ print(
     scale_color_manual(values=benchmark.colors[c("Intel", "AMD")],
                        breaks=c("Intel", "AMD")) +
     scale_y_log10() +
-    labs(title="History (Intel and AMD)", x="Date", y=score, color=NULL) +
+    labs(title="History (Intel and AMD)", x=NULL, y=score, color=NULL) +
     themeBenchmark() +
     theme(legend.position=c(0.02, 0.98),
           legend.justification=c(0, 1),
@@ -71,7 +71,7 @@ print(
     geom_point(color=benchmark.colors[["Intel"]], size=2) +
     scale_shape_manual(values=c(Early=1, Late=16)) +
     scale_y_log10() +
-    labs(title=intel, x="Date", y=score, shape=NULL) +
+    labs(title=intel, x=NULL, y=score, shape=NULL) +
     themeBenchmark() +
     theme(legend.position=c(0.02, 0.98),
           legend.justification=c(0, 1),
@@ -90,7 +90,7 @@ print(
     geom_point(color=benchmark.colors[["Intel"]], size=2) +
     scale_shape_manual(values=c(Early=1, Late=16)) +
     scale_y_log10() +
-    labs(title=intel, x="Date", y=score, shape=NULL) +
+    labs(title=intel, x=NULL, y=score, shape=NULL) +
     themeBenchmark() +
     theme(legend.position=c(0.02, 0.98),
           legend.justification=c(0, 1),
@@ -105,11 +105,12 @@ taf.png("history_rate", width=1200)
 print(
   ggplot(history.rate, aes(x=Period, y=100*Annual, fill=Period)) +
     geom_col(width=0.72) +
-    scale_fill_manual(values=c(Early="#CC79A7", Late="#0072B2"),
+    scale_fill_manual(values=c(Early="#8FBBD6", Late="#0072B2"),
                       guide="none") +
     scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
     labs(title=intel, x=NULL, y="Annual improvement (%)") +
-    themeBenchmark()
+    themeBenchmark() +
+    theme(panel.grid.major.x=element_blank())
 )
 dev.off()
 
@@ -118,10 +119,11 @@ taf.png("history_time", width=1200)
 print(
   ggplot(history.rate, aes(x=Period, y=Doubling, fill=Period)) +
     geom_col(width=0.72) +
-    scale_fill_manual(values=c(Early="#CC79A7", Late="#0072B2"),
+    scale_fill_manual(values=c(Early="#8FBBD6", Late="#0072B2"),
                       guide="none") +
     scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
     labs(title=intel, x=NULL, y="Doubling time (yr)") +
-    themeBenchmark()
+    themeBenchmark() +
+    theme(panel.grid.major.x=element_blank())
 )
 dev.off()
