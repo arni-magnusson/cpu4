@@ -5,6 +5,7 @@
 # After:  comparison.png, desc.csv, each.png, summary.csv (report)
 
 library(TAF)
+library(ggplot2)
 source("utilities.R")
 
 mkdir("report")
@@ -52,36 +53,12 @@ smooth_p3560$idle <- mean(p3560$idle$Watt)
 
 # Plot each machine
 taf.png("each", 3600, 2400, res=300)
-par(mfrow=c(3,4))
-plot_machine(m4700, "Freq")
-plot_machine(p15gen1, "Freq")
-plot_machine(p3560, "Freq")
-plot_machine(p1gen8, "Freq")
-plot_machine(m4700, "Temp")
-plot_machine(p15gen1, "Temp")
-plot_machine(p3560, "Temp")
-plot_machine(p1gen8, "Temp")
-plot_machine(m4700, "Watt")
-plot_machine(p15gen1, "Watt")
-plot_machine(p3560, "Watt")
-plot_machine(p1gen8, "Watt")
+print(plot_each(machines))
 dev.off()
 
 # Plot machine comparison
 taf.png("comparison", 3600, 2400, res=300)
-par(mfrow=c(3,4))
-plot_comparison(machines, "idle", "Freq")
-plot_comparison(machines, "single", "Freq")
-plot_comparison(machines, "main", "Freq")
-plot_comparison(machines, "full", "Freq")
-plot_comparison(machines, "idle", "Temp")
-plot_comparison(machines, "single", "Temp")
-plot_comparison(machines, "main", "Temp")
-plot_comparison(machines, "full", "Temp")
-plot_comparison(machines, "idle", "Watt")
-plot_comparison(machines, "single", "Watt")
-plot_comparison(machines, "main", "Watt")
-plot_comparison(machines, "full", "Watt")
+print(plot_comparison(machines))
 dev.off()
 
 # Round and divide values
