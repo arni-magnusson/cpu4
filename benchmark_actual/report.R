@@ -4,23 +4,32 @@
 # After:  speed.csv, speed.png (report)
 
 library(TAF)
+library(ggplot2)
 
 mkdir("report")
 
 # Read data
 catage <- read.taf("output/catage.csv")
 
-# Reorder machines
-catage$machine <- reorder(catage$machine, catage$speed, median)
+# Order machines from oldest to newest so the newest appears at the top
+catage$machine <- factor(catage$machine,
+                         levels=c("m4700", "p15gen1", "p3560", "p1gen8"))
 
-# Prepare plot
-labels <- c("Short", "Sustained")
-
-# Barplot
+# Plot
 taf.png("speed")
-barplot(xtabs(speed~job+machine, catage), beside=TRUE, legend=TRUE,
-        args.legend=list(x="topleft", legend=labels, bty="n", inset=0.02),
-        main="Speed measurements", ylab="Speed (model iterations / sec)")
+print(
+  ggplot(catage, aes(x=speed, y=machine, fill=job)) +
+    geom_col(position=position_dodge(width=0.8), width=0.75, color="black") +
+    scale_fill_manual(values=c(short="gray30", sustained="gray90"),
+                      breaks=c("short", "sustained"),
+                      labels=c("Short", "Sustained")) +
+    scale_x_continuous(expand=expansion(mult=c(0, 0.05))) +
+    labs(title="Speed measurements", x="Speed (model iterations / sec)",
+         y=NULL, fill=NULL) +
+    theme_classic() +
+    theme(plot.title=element_text(hjust=0.5),
+          legend.position="top")
+)
 dev.off()
 
 # Prepare summary table
