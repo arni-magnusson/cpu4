@@ -21,6 +21,7 @@ processor.colors <- c(
 )
 state.order <- c("idle", "single", "main", "full")
 state.legend.order <- rev(state.order)
+state.labels <- c(idle="Idle", single="Single", main="Main", full="Full")
 state.colors <- c(
   idle="#999999",
   single="#D55E00",
@@ -39,6 +40,8 @@ themeCPUMon <- function()
           axis.text.y=element_text(angle=90, hjust=0.5, vjust=0.5),
           panel.grid.major=element_line(color="grey85", linewidth=0.3),
           panel.grid.minor=element_blank(),
+          panel.spacing.x=grid::unit(0.6, "cm"),
+          panel.spacing.y=grid::unit(0.6, "cm"),
           plot.margin=margin(24, 24, 24, 24),
           strip.text=element_text(face="bold"))
 }
@@ -51,6 +54,8 @@ sensor_data <- function(machines)
       for(variable in variable.order)
       {
         value <- machines[[machine]][[state]][[paste0(variable, "1")]]
+        if(variable == "Freq")
+          value <- value / 1000
         data[[length(data)+1]] <- data.frame(
           iteration=seq_along(value),
           value=value,
@@ -67,29 +72,55 @@ sensor_data <- function(machines)
   data
 }
 
+sensor_breaks <- function(limits)
+{
+  maximum <- max(limits, na.rm=TRUE)
+  if(maximum > 10 && maximum <= 150)
+    c(0, 25, 50, 75, 100)
+  else
+    pretty(limits, n=5)
+}
+
 plot_comparison <- function(machines)
 {
   data <- sensor_data(machines)
-  panel.levels <- unlist(lapply(variable.order, function(variable)
-    paste0(variable, " (", state.order, ")")))
-  data$panel <- factor(paste0(data$variable, " (", data$state, ")"),
-                       levels=panel.levels)
 
   ggplot(data, aes(x=iteration, y=value, color=machine)) +
     geom_point(size=0.8, alpha=0.65) +
-    facet_wrap(vars(panel), ncol=4, scales="free_y") +
+    facet_grid(rows=vars(variable), cols=vars(state), scales="free_y",
+               switch="y",
+               labeller=labeller(
+                 variable=as_labeller(c(
+                   Freq="Frequency (GHz)",
+                   Temp="Temperature (\u02DAC)",
+                   Fan="Fan (rpm)"
+                 )),
+                 state=as_labeller(c(
+                   idle="Idle",
+                   single="Single",
+                   main="Main",
+                   full="Full"
+                 ))
+               )) +
     scale_color_manual(values=processor.colors,
                        breaks=processor.order,
                        labels=processor.labels) +
     scale_x_continuous(limits=c(0, 300), breaks=seq(0, 300, 50),
                        expand=expansion(mult=c(0, 0))) +
+    scale_y_continuous(limits=c(0, NA), breaks=sensor_breaks,
+                       expand=expansion(mult=c(0, 0.1))) +
     labs(x="Iteration", y=NULL, color=NULL) +
     themeCPUMon() +
     theme(legend.position="right",
           legend.background=element_rect(fill="white", color=NA),
           legend.key=element_rect(fill="white", color=NA),
+          legend.key.spacing.y=grid::unit(0.3, "cm"),
           legend.text=element_text(size=8),
-          strip.text=element_text(face="bold", size=10))
+          strip.placement="outside",
+          strip.background=element_blank(),
+          strip.text.x=element_text(face="bold"),
+          strip.text.y.left=element_text(angle=90, face="plain", size=10)) +
+    guides(color=guide_legend(override.aes=list(size=1.6, alpha=1)))
 }
 
 plot_cores <- function(cores)
@@ -101,7 +132,7 @@ plot_cores <- function(cores)
     for(state in state.order)
       data[[length(data)+1]] <- data.frame(
         core=seq_len(nrow(values)),
-        value=values[, state],
+        value=values[, state] / 1000,
         machine=machine,
         state=state
       )
@@ -114,12 +145,14 @@ plot_cores <- function(cores)
   ggplot(data, aes(x=core, y=value, color=state, group=state)) +
     geom_line(linewidth=0.7) +
     geom_point(size=2, show.legend=FALSE) +
-    facet_wrap(vars(machine), ncol=1, scales="free",
+    facet_wrap(vars(machine), ncol=2, scales="free_x",
                labeller=as_labeller(processor.labels)) +
-    scale_color_manual(values=state.colors, breaks=state.legend.order) +
+    scale_color_manual(values=state.colors, breaks=state.legend.order,
+                       labels=state.labels) +
     scale_x_continuous(breaks=1:16, expand=expansion(mult=c(0.02, 0.02))) +
-    scale_y_continuous(expand=expansion(mult=c(0.02, 0.1))) +
-    labs(x="Core", y="Freq", color=NULL) +
+    scale_y_continuous(limits=c(0, NA), breaks=sensor_breaks,
+                       expand=expansion(mult=c(0, 0.1))) +
+    labs(x="Core", y="Frequency (GHz)", color=NULL) +
     themeCPUMon() +
     theme(legend.position="right",
           legend.background=element_rect(fill="white", color=NA),
@@ -130,28 +163,37 @@ plot_cores <- function(cores)
 plot_each <- function(machines)
 {
   data <- sensor_data(machines)
-  panel.levels <- unlist(lapply(processor.order, function(machine)
-    paste(machine, variable.order, sep="|")))
-  panel.labels <- unlist(lapply(processor.order, function(machine)
-    paste0(processor.labels[[machine]], " | ", variable.order)))
-  data$panel <- factor(paste(data$machine, data$variable, sep="|"),
-                       levels=panel.levels,
-                       labels=panel.labels)
+  data$machine <- factor(data$machine, levels=rev(processor.order))
 
   ggplot(data, aes(x=iteration, y=value, color=state)) +
-    geom_point(shape=1, size=1, alpha=0.65, stroke=0.5) +
-    facet_wrap(vars(panel), ncol=3, scales="free_y") +
-    scale_color_manual(values=state.colors, breaks=state.legend.order) +
+    geom_point(size=0.8, alpha=0.65) +
+    facet_grid(rows=vars(variable), cols=vars(machine), scales="free_y",
+               switch="y",
+               labeller=labeller(
+                 variable=as_labeller(c(
+                   Freq="Frequency (GHz)",
+                   Temp="Temperature (\u02DAC)",
+                   Fan="Fan (rpm)"
+                 )),
+                 machine=as_labeller(processor.labels)
+               )) +
+    scale_color_manual(values=state.colors, breaks=state.legend.order,
+                       labels=state.labels) +
     scale_x_continuous(limits=c(0, 300), breaks=seq(0, 300, 50),
                        expand=expansion(mult=c(0, 0))) +
-    scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
+    scale_y_continuous(limits=c(0, NA), breaks=sensor_breaks,
+                       expand=expansion(mult=c(0, 0.1))) +
     labs(x="Iteration", y=NULL, color=NULL) +
     themeCPUMon() +
     theme(legend.position="right",
           legend.background=element_rect(fill="white", color=NA),
           legend.key=element_rect(fill="white", color=NA),
           legend.text=element_text(size=9),
-          strip.text=element_text(face="bold", size=9))
+          strip.placement="outside",
+          strip.background=element_blank(),
+          strip.text.x=element_text(face="bold", size=9),
+          strip.text.y.left=element_text(angle=90, face="plain", size=10)) +
+    guides(color=guide_legend(override.aes=list(size=1.6, alpha=1)))
 }
 
 remove_first <- function(x, burn=0, length=300)

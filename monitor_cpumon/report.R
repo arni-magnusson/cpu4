@@ -30,12 +30,12 @@ print(plot_comparison(machines))
 dev.off()
 
 # Plot cores
-taf.png("cores", 2400, 3200, res=300)
+taf.png("cores", 1600, 1600)
 print(plot_cores(cores))
 dev.off()
 
 # Plot each machine
-taf.png("each", 3600, 3200, res=300)
+taf.png("each", 3600, 2400, res=300)
 print(plot_each(machines))
 dev.off()
 
