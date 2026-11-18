@@ -19,21 +19,26 @@ r7.low <- read.taf("output/r7_low.csv", colClasses=c(Date="Date"))
 
 # Plot improvement
 taf.png("improve_amd_high")
-implot(r7.high[-1,], main="AMD (high power)", col=2)
+print(implot(r7.high[-1,], title="AMD (high power)",
+             color=benchmark.colors[["AMD"]]))
 dev.off()
 
 taf.png("improve_amd_low")
-implot(r7.low, main="AMD (low power)", col=2)
+print(implot(r7.low, title="AMD (low power)",
+             color=benchmark.colors[["AMD"]]))
 dev.off()
 
 taf.png("improve_intel_high")
-implot(i7.high[-1,], main="Intel (high power)", col=4)
+print(implot(i7.high[-1,], title="Intel (high power)",
+             color=benchmark.colors[["Intel"]]))
 dev.off()
 
 taf.png("improve_intel_low")
-implot(i7.low[-1,], main="Intel (low power)", col=4)
+print(implot(i7.low[-1,], title="Intel (low power)",
+             color=benchmark.colors[["Intel"]]))
 dev.off()
 
 taf.png("improve_intel_medium")
-implot(i7.medium, main="Intel (medium power)", col=4)
+print(implot(i7.medium, title="Intel (medium power)",
+             color=benchmark.colors[["Intel"]]))
 dev.off()

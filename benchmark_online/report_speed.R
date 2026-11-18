@@ -19,41 +19,48 @@ r7.low <- read.taf("output/r7_low.csv", colClasses=c(Date="Date"))
 # Prepare for plotting
 score <- "Score (PassMark single thread)"
 
-# Plot speed over time
+intel.high <- transform(i7.high[-1,], Company="Intel", Series="Intel high")
+amd.high <- transform(r7.high, Company="AMD", Series="AMD high")
+intel.medium <- transform(i7.medium[-1,], Company="Intel",
+                          Series="Intel medium")
+intel.low <- transform(i7.low[-1,], Company="Intel", Series="Intel low")
+amd.low <- transform(r7.low, Company="AMD", Series="AMD low")
+
+plot.speed <- function(data, title)
+{
+  ggplot(data, aes(x=Date, y=Speed, color=Company, group=Series)) +
+    geom_line(linewidth=0.8) +
+    geom_point(shape=1, size=2) +
+    scale_color_manual(values=benchmark.colors[c("Intel", "AMD")],
+                       breaks=intersect(c("Intel", "AMD"), unique(data$Company))) +
+    scale_x_date(limits=as.Date(c("2010-01-01", "2027-01-01")),
+                 date_breaks="5 years", date_labels="%Y",
+                 expand=expansion(mult=0)) +
+    scale_y_log10(limits=c(700, 4400),
+                  breaks=c(1000, 2000, 3000, 4000),
+                  expand=expansion(mult=0)) +
+    labs(title=title, x="Date", y=score, color=NULL) +
+    themeBenchmark() +
+    theme(legend.position=c(0.02, 0.98),
+          legend.justification=c(0, 1),
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=10))
+}
+
 taf.png("speed_all", width=1200)
-plot(Speed~Date, i7.high[-1,], log="y", type="o", col=4, ylab=score,
-     xlim=as.Date(c("2010-01-01", "2027-01-01")), ylim=c(700, 4400))
-title("Intel and AMD (high/medium/low power)")
-lines(Speed~Date, r7.high, type="o", col=2)
-lines(Speed~Date, i7.medium, type="o", col=4)
-lines(Speed~Date, i7.low[-1,], type="o", col=4)
-lines(Speed~Date, r7.low, type="o", col=2)
-legend("topleft", legend=c("Intel", "AMD"), lty=1, pch=1, col=c(4,2), bty="n",
-       inset=0.02, y.intersp=1.25)
+speed.all <- rbind(intel.high, amd.high, intel.medium, intel.low, amd.low)
+print(plot.speed(speed.all, "Intel and AMD (high/medium/low power)"))
 dev.off()
 
 taf.png("speed_high", width=1200)
-plot(Speed~Date, i7.high[-1,], log="y", type="o", col=4, ylab=score,
-     xlim=as.Date(c("2010-01-01", "2027-01-01")), ylim=c(700, 4400))
-title("Intel and AMD (high power)")
-lines(Speed~Date, r7.high, type="o", col=2)
-legend("topleft", legend=c("Intel", "AMD"), lty=1, pch=1, col=c(4,2), bty="n",
-       inset=0.02, y.intersp=1.25)
+print(plot.speed(rbind(intel.high, amd.high), "Intel and AMD (high power)"))
 dev.off()
 
 taf.png("speed_low", width=1200)
-plot(Speed~Date, i7.low[-1,], log="y", type="o", col=4, ylab=score,
-     xlim=as.Date(c("2010-01-01", "2027-01-01")), ylim=c(700, 4400))
-title("Intel and AMD (low power)")
-lines(Speed~Date, r7.low, type="o", col=2)
-legend("topleft", legend=c("Intel", "AMD"), lty=1, pch=1, col=c(4,2), bty="n",
-       inset=0.02, y.intersp=1.25)
+print(plot.speed(rbind(intel.low, amd.low), "Intel and AMD (low power)"))
 dev.off()
 
 taf.png("speed_medium", width=1200)
-plot(Speed~Date, i7.medium[-1,], log="y", type="o", col=4, ylab=score,
-     xlim=as.Date(c("2010-01-01", "2027-01-01")), ylim=c(700, 4400))
-title("Intel (medium power)")
-legend("topleft", legend=c("Intel"), lty=1, pch=1, col=c(4), bty="n",
-       inset=0.02, y.intersp=1.25)
+print(plot.speed(intel.medium, "Intel (medium power)"))
 dev.off()

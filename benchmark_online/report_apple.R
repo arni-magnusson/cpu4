@@ -20,45 +20,78 @@ r7.high <- read.taf("output/r7_high.csv", colClasses=c(Date="Date"))
 
 # Prepare for plotting
 score <- "Score (PassMark single thread)"
-lwd <- 2
 
 # Companies: Apple vs Intel vs AMD
 taf.png("companies_data", width=1200)
-plot(Speed~Date, companies, type="n", log="y",
-     main="Processor performance by company", ylab=score)
-points(Speed~Date, companies, subset=Company=="Apple", pch=19, col=1)
-points(Speed~Date, companies, subset=Company=="Intel", pch=19, col=4)
-points(Speed~Date, companies, subset=Company=="AMD", pch=19, col=2)
-legend("topleft", legend=c("Apple", "Intel", "AMD"), pch=19, col=c(1,4,2),
-       bty="n", inset=0.02, y.intersp=1.25)
+print(
+  ggplot(companies, aes(x=Date, y=Speed, color=Company)) +
+    geom_point(size=2) +
+    scale_color_manual(values=benchmark.colors,
+                       breaks=c("Apple", "Intel", "AMD")) +
+    scale_y_log10() +
+    labs(title="Processor performance by company", x="Date", y=score,
+         color=NULL) +
+    themeBenchmark() +
+    theme(legend.position=c(0.02, 0.98),
+          legend.justification=c(0, 1),
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=10))
+)
 dev.off()
 
 # Companies with fitted regression lines
 taf.png("companies_fit", width=1200)
-plot(Speed~Date, companies, type="n", log="y",
-     main="Processor performance by company", ylab=score)
-points(Speed~Date, companies, subset=Company=="Apple", pch=19, col=1)
-points(Speed~Date, companies, subset=Company=="Intel", pch=19, col=4)
-points(Speed~Date, companies, subset=Company=="AMD", pch=19, col=2)
-lines(Speed~Date, companies.fit, subset=Company=="Apple", lwd=lwd, col=1)
-lines(Speed~Date, companies.fit, subset=Company=="Intel", lwd=lwd, col=4)
-lines(Speed~Date, companies.fit, subset=Company=="AMD", lwd=lwd, col=2)
-legend("topleft", legend=c("Apple", "Intel", "AMD"), pch=19, col=c(1,4,2),
-       bty="n", inset=0.02, y.intersp=1.25)
+print(
+  ggplot(companies, aes(x=Date, y=Speed, color=Company)) +
+    geom_line(data=companies.fit, linewidth=1) +
+    geom_point(size=2) +
+    scale_color_manual(values=benchmark.colors,
+                       breaks=c("Apple", "Intel", "AMD")) +
+    scale_y_log10() +
+    labs(title="Processor performance by company", x="Date", y=score,
+         color=NULL) +
+    themeBenchmark() +
+    theme(legend.position=c(0.02, 0.98),
+          legend.justification=c(0, 1),
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=10))
+)
 dev.off()
 
 # Lag between companies
 taf.png("companies_lag")
-companies.lag$Company <- reorder(companies.lag$Company, companies.lag$Lag)
-barplot(Lag~Company, companies.lag, xlab="", ylab="Lag (yrs)", col=0, border=NA)
-grid(NA, NULL, lty=1)
-barplot(Lag~Company, companies.lag, add=TRUE, col=c(1,4,2))
-title(main="Lag until company reaches the CPU performance of the best company")
+companies.lag <- companies.lag[order(companies.lag$Lag),]
+companies.lag$Company <- factor(companies.lag$Company,
+                                levels=companies.lag$Company)
+print(
+  ggplot(companies.lag, aes(x=Company, y=Lag, fill=Company)) +
+    geom_col(width=0.72) +
+    scale_fill_manual(values=benchmark.colors, guide="none") +
+    scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
+    labs(title="Lag until company reaches the CPU performance of the best company",
+         x=NULL, y="Lag (yrs)") +
+    themeBenchmark()
+)
 dev.off()
 
 # MacBook Air vs Pro
+apple$Type <- ifelse(grepl("-Pro$", apple$Model), "Pro", "Air")
+apple$Type <- factor(apple$Type, levels=c("Pro", "Air"))
 taf.png("companies_macbook", width=1200)
-plot(Speed~Date, apple, log="y", pch=c(1,19), ylab=score, main="Apple MacBook")
-legend("topleft", legend=c("Pro", "Air"), pch=c(19,1), bty="n", inset=0.02,
-       y.intersp=1.25)
+print(
+  ggplot(apple, aes(x=Date, y=Speed, color=Type, shape=Type)) +
+    geom_point(size=2.2) +
+    scale_color_manual(values=c(Pro="#0072B2", Air="#D55E00")) +
+    scale_shape_manual(values=c(Pro=16, Air=1)) +
+    scale_y_log10() +
+    labs(title="Apple MacBook", x="Date", y=score, color=NULL, shape=NULL) +
+    themeBenchmark() +
+    theme(legend.position=c(0.02, 0.98),
+          legend.justification=c(0, 1),
+          legend.background=element_rect(fill="white", color=NA),
+          legend.key=element_rect(fill="white", color=NA),
+          legend.text=element_text(size=10))
+)
 dev.off()
