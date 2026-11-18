@@ -28,7 +28,7 @@ print(
     geom_point(size=2) +
     scale_color_manual(values=benchmark.colors,
                        breaks=c("Apple", "Intel", "AMD")) +
-    scale_y_log10() +
+    scale_y_log10(breaks=c(1000, 2000, 3000, 4000, 6000)) +
     labs(title="Processor performance by company", x=NULL, y=score,
          color=NULL) +
     themeBenchmark() +
@@ -48,7 +48,7 @@ print(
     geom_point(size=2) +
     scale_color_manual(values=benchmark.colors,
                        breaks=c("Apple", "Intel", "AMD")) +
-    scale_y_log10() +
+    scale_y_log10(breaks=c(1000, 2000, 3000, 4000, 6000)) +
     labs(title="Processor performance by company", x=NULL, y=score,
          color=NULL) +
     themeBenchmark() +
@@ -73,8 +73,7 @@ print(
     labs(title="Lag until company reaches the CPU performance of the best company",
          x=NULL, y="Lag (yrs)") +
     themeBenchmark() +
-    theme(panel.grid.major.x=element_blank(),
-          panel.grid.major.y=element_blank())
+    theme(panel.grid.major.x=element_blank())
 )
 dev.off()
 
@@ -88,7 +87,10 @@ print(
     scale_color_manual(values=c(Pro=benchmark.colors[["Apple"]],
                                 Air=benchmark.colors[["Apple"]])) +
     scale_shape_manual(values=c(Pro=16, Air=1)) +
-    scale_y_log10() +
+    scale_x_date(limits=as.Date(c("2020-01-01", "2027-01-01")),
+                 date_breaks="1 year", date_labels="%Y",
+                 expand=expansion(mult=0)) +
+    scale_y_log10(breaks=c(3500, 4000, 4500, 5000, 5500, 6000)) +
     labs(title="MacBook", x=NULL, y=score, color=NULL, shape=NULL) +
     themeBenchmark() +
     theme(legend.position=c(0.02, 0.98),

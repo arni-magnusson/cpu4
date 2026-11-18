@@ -111,8 +111,7 @@ print(
     scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
     labs(title=intel, x=NULL, y="Annual improvement (%)") +
     themeBenchmark() +
-    theme(panel.grid.major.x=element_blank(),
-          panel.grid.major.y=element_blank())
+    theme(panel.grid.major.x=element_blank())
 )
 dev.off()
 
@@ -126,7 +125,6 @@ print(
     scale_y_continuous(expand=expansion(mult=c(0, 0.1))) +
     labs(title=intel, x=NULL, y="Doubling time (yr)") +
     themeBenchmark() +
-    theme(panel.grid.major.x=element_blank(),
-          panel.grid.major.y=element_blank())
+    theme(panel.grid.major.x=element_blank())
 )
 dev.off()
