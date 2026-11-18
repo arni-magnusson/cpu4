@@ -36,7 +36,7 @@ geomLaptopPoints <- function()
 scaleLaptopFill <- function()
 {
   ggplot2::scale_fill_manual(values=c(Workstation="#0072B2",
-                                      Intermediate="#D55E00",
-                                      Ultraportable="#009E73"),
+                                      Intermediate="#8FBBD6",
+                                      Ultraportable="#FFFFFF"),
                              guide="none")
 }

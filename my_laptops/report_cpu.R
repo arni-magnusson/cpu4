@@ -22,7 +22,8 @@ print(
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
     scale_y_log10(limits=c(0.4, 32),
-                  breaks=c(0.5, 1, 2, 4, 8, 16, 32)) +
+                  breaks=c(0.5, 1, 2, 4, 8, 16, 32),
+                  labels=c("0.5", "1", "2", "4", "8", "16", "32")) +
     labs(title="CPU: On-chip memory", x=NULL, y="Cache (MB)") +
     themeLaptops()
 )
@@ -93,9 +94,9 @@ dev.off()
 taf.png("cpu_speed_fit")
 print(
   ggplot(specs, aes(x=Date, y=Speed)) +
-    geomLaptopPoints() +
     geom_line(data=speed.fit, aes(x=Date, y=Speed), inherit.aes=FALSE,
               color="#D55E00", linewidth=0.7) +
+    geomLaptopPoints() +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
     scale_y_log10(limits=c(350, 5000)) +

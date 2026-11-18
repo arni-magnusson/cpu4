@@ -35,7 +35,9 @@ print(
     geomLaptopPoints() +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
-    scale_y_log10(limits=c(0.4, 75), breaks=c(0.5, 1, 2, 4, 8, 16, 32, 64)) +
+    scale_y_log10(limits=c(0.4, 75),
+                  breaks=c(0.5, 1, 2, 4, 8, 16, 32, 64),
+                  labels=c("0.5", "1", "2", "4", "8", "16", "32", "64")) +
     labs(title="Laptop: Memory", x=NULL, y="Memory (GB)") +
     themeLaptops()
 )
@@ -60,7 +62,8 @@ print(
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
     scale_y_log10(limits=c(0.03, 4),
-                  breaks=c(0.05, 0.1, 0.2, 0.5, 1, 2, 4)) +
+                  breaks=c(0.05, 0.1, 0.2, 0.5, 1, 2, 4),
+                  labels=c("0.05", "0.1", "0.2", "0.5", "1", "2", "4")) +
     labs(title="Laptop: Storage drive", x=NULL, y="Storage (TB)") +
     themeLaptops()
 )
@@ -134,11 +137,11 @@ taf.png("storage_memory_text")
 specs$Percentage <- specs$RAM / (1000*specs$Storage)
 n <- nrow(specs)
 storage.labels <- data.frame(
-  Date=c(specs$Date[1]+130, specs$Date[1]+120, specs$Date[2], specs$Date[2],
-         specs$Date[n]-80, specs$Date[n]-30),
-  Percentage=c(specs$Percentage[1]+0.004, specs$Percentage[1]-0.004,
-               specs$Percentage[2]+0.004, specs$Percentage[2]-0.004,
-               specs$Percentage[n]+0.004, specs$Percentage[n]-0.004),
+  Date=c(specs$Date[1], specs$Date[1], specs$Date[2], specs$Date[2],
+         specs$Date[n], specs$Date[n]),
+  Percentage=c(specs$Percentage[1]+0.003, specs$Percentage[1]-0.003,
+               specs$Percentage[2]+0.003, specs$Percentage[2]-0.003,
+               specs$Percentage[n]+0.003, specs$Percentage[n]-0.003),
   label=c(paste("512 MB", "RAM", sep="\n"),
           paste("40 GB", "HDD", sep="\n"),
           paste("4 GB", "RAM", sep="\n"),
@@ -152,7 +155,8 @@ print(
     geom_hline(yintercept=0.02, linetype=3, color="#D55E00") +
     geom_text(data=storage.labels,
               aes(x=Date, y=Percentage, label=label),
-              inherit.aes=FALSE, color="grey35", size=3.2) +
+              inherit.aes=FALSE, color="grey35", size=3.0, hjust=0.5,
+              lineheight=1.1) +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
     coord_cartesian(ylim=lim(specs$Percentage, 1.15)) +
@@ -173,9 +177,9 @@ thickness.labels <- rbind(
 )
 print(
   ggplot(specs, aes(x=Height, y=W)) +
-    geomLaptopPoints() +
     geom_smooth(method="lm", formula=y~x, se=FALSE,
                 color="#D55E00", linewidth=0.7) +
+    geomLaptopPoints() +
     geom_text(data=thickness.labels,
               aes(x=Height, y=W, label=label),
               inherit.aes=FALSE, color="grey35", size=3.2) +
