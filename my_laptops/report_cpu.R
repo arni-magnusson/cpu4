@@ -6,6 +6,7 @@
 #         cpu_speed_nm.png, cpu_threads.png, cpu_watt.png (report)
 
 library(TAF)
+library(ggplot2)
 
 mkdir("report")
 
@@ -15,66 +16,145 @@ speed.fit <- read.taf("output/speed_fit.csv", colClasses=c(Date="Date"))
 
 # Univariate time series
 taf.png("cpu_cache")
-plot(Cache~Date, specs, log="y", pch=21, bg=bg, yaxt="n", ylim=c(0.4, 32),
-     main="CPU: On-chip memory", ylab="Cache (MB)")
-values <- c("0.5", "1", "2", "4", "8", "16", "32")
-axis(2, as.numeric(values), values)
+print(
+  ggplot(specs, aes(x=Date, y=Cache)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(0.4, 32),
+                  breaks=c(0.5, 1, 2, 4, 8, 16, 32)) +
+    labs(title="CPU: On-chip memory", x=NULL, y="Cache (MB)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_cores")
-plot(Cores~Date, specs, pch=21, bg=bg, yaxt="n", ylim=c(0.5, 8.5),
-     main="CPU: Processing units", ylab="Number of cores")
-axis(2, c(1,2,4,6,8))
+print(
+  ggplot(specs, aes(x=Date, y=Cores)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_continuous(limits=c(0.5, 8.5), breaks=c(1, 2, 4, 6, 8)) +
+    labs(title="CPU: Processing units", x=NULL, y="Number of cores") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_efficiency")
-plot(Speed/W~Date, specs, log="y", pch=21, bg=bg, ylim=c(4.4,160),
-     main="CPU: Efficiency", xlab="sqrt(Process node)",
-     ylab="Single-thread performance per watt")
+print(
+  ggplot(specs, aes(x=Date, y=Speed/W)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(4.4, 160)) +
+    labs(title="CPU: Efficiency", x=NULL, y="Single-thread performance per watt") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_freq")
-plot(Turbo/1000~Date, specs, log="y", pch=21, bg=bg, ylim=c(2,6),
-     main="CPU: Maximum frequency", ylab="Turbo (GHz)")
+print(
+  ggplot(specs, aes(x=Date, y=Turbo/1000)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(2, 6)) +
+    labs(title="CPU: Maximum frequency", x=NULL, y="Turbo (GHz)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_nm")
-plot(nm~Date, specs, log="y", pch=21, bg=bg, ylim=c(2.5, 150),
-     main="CPU: Semiconductor technology", ylab="Process node (nm)")
+print(
+  ggplot(specs, aes(x=Date, y=nm)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(2.5, 150)) +
+    labs(title="CPU: Semiconductor technology", x=NULL,
+         y="Process node (nm)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_speed_data")
-plot(Speed~Date, specs, log="y", pch=21, bg=bg, ylim=c(350, 5000),
-     main="CPU: Benchmark performance", ylab="Score (PassMark single thread)")
+print(
+  ggplot(specs, aes(x=Date, y=Speed)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(350, 5000)) +
+    labs(title="CPU: Benchmark performance", x=NULL,
+         y="Score (PassMark single thread)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_speed_fit")
-plot(Speed~Date, specs, log="y", pch=21, bg=bg, ylim=c(350, 5000),
-     main="CPU: Performance trend", ylab="Score (PassMark single thread)")
-lines(Speed~Date, speed.fit)
+print(
+  ggplot(specs, aes(x=Date, y=Speed)) +
+    geomLaptopPoints() +
+    geom_line(data=speed.fit, aes(x=Date, y=Speed), inherit.aes=FALSE,
+              color="#D55E00", linewidth=0.7) +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(350, 5000)) +
+    labs(title="CPU: Performance trend", x=NULL,
+         y="Score (PassMark single thread)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_threads")
-plot(Threads~Date, specs, pch=21, bg=bg, yaxt="n", ylim=c(0.5, 16.5),
-     main="CPU: Parallel processing capacity", ylab="Number of threads")
-values <- c(0.9, 2.1, 4, 6, 8, 10, 12, 14, 16)
-axis(2, values, round(values))
+print(
+  ggplot(specs, aes(x=Date, y=Threads)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_continuous(limits=c(0.5, 16.5),
+                       breaks=c(0.9, 2.1, 4, 6, 8, 10, 12, 14, 16),
+                       labels=round) +
+    labs(title="CPU: Parallel processing capacity", x=NULL,
+         y="Number of threads") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_watt")
-plot(W~Date, specs, ylim=lim(W), pch=21, bg=bg,
-     main="CPU: Processor power", ylab="Thermal design power (W)")
+print(
+  ggplot(specs, aes(x=Date, y=W)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    coord_cartesian(ylim=lim(specs$W)) +
+    labs(title="CPU: Processor power", x=NULL,
+         y="Thermal design power (W)") +
+    themeLaptops()
+)
 dev.off()
 
 # Relationships between variables
 taf.png("cpu_speed_freq")
-plot(Speed~I(Turbo/1000), specs, log="xy", pch=21, bg=bg, ylim=c(350, 5000),
-     main="CPU: Frequency and performance", xlab="Turbo (GHz)",
-     ylab="Score (PassMark single thread)")
+print(
+  ggplot(specs, aes(x=Turbo/1000, y=Speed)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_log10() +
+    scale_y_log10(limits=c(350, 5000)) +
+    labs(title="CPU: Frequency and performance", x="Turbo (GHz)",
+         y="Score (PassMark single thread)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("cpu_speed_nm")
-plot(Speed~sqrt(nm), specs, log="y", pch=21, bg=bg, ylim=c(350, 5000),
-     main="CPU: Performance and semiconductor technology",
-     xlab="sqrt(Process node)", ylab="Score (PassMark single thread)")
+print(
+  ggplot(specs, aes(x=sqrt(nm), y=Speed)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_y_log10(limits=c(350, 5000)) +
+    labs(title="CPU: Performance and semiconductor technology",
+         x="sqrt(Process node)", y="Score (PassMark single thread)") +
+    themeLaptops()
+)
 dev.off()

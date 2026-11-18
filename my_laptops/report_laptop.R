@@ -9,6 +9,7 @@
 
 library(TAF)
 library(knitr)
+library(ggplot2)
 
 mkdir("report")
 
@@ -17,89 +18,172 @@ specs <- read.taf("output/specs.csv", colClasses=c(Date="Date"))
 
 # Plot laptop variables
 taf.png("laptop_display")
-plot(Disp~Date, specs, pch=21, bg=bg, yaxt="n", ylim=c(13,16.2),
-     main="Laptop: Display", ylab="Screen size (in)")
-axis(2, c(13, 14, 15, 16))
+print(
+  ggplot(specs, aes(x=Date, y=Disp)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_continuous(limits=c(13, 16.2), breaks=13:16) +
+    labs(title="Laptop: Display", x=NULL, y="Screen size (in)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("laptop_memory")
-plot(RAM~Date, specs, log="y", pch=21, bg=bg, yaxt="n", ylim=c(0.4, 75),
-     main="Laptop: Memory", ylab="Memory (GB)")
-values <- c("0.5", "1", "2", "4", "8", "16", "32", "64")
-axis(2, as.numeric(values), values)
+print(
+  ggplot(specs, aes(x=Date, y=RAM)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(0.4, 75), breaks=c(0.5, 1, 2, 4, 8, 16, 32, 64)) +
+    labs(title="Laptop: Memory", x=NULL, y="Memory (GB)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("laptop_power")
-plot(Power~Date, specs, ylim=lim(Power), pch=21, bg=bg,
-     main="Laptop: Power adapter", ylab="Power (W)")
+print(
+  ggplot(specs, aes(x=Date, y=Power)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    coord_cartesian(ylim=lim(specs$Power)) +
+    labs(title="Laptop: Power adapter", x=NULL, y="Power (W)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("laptop_storage")
-plot(Storage~Date, specs, log="y", pch=21, bg=bg, yaxt="n", ylim=c(0.03, 4),
-     main="Laptop: Storage drive", ylab="Storage (TB)")
-values <- c("0.05", "0.1", "0.2", "0.5", "1", "2", "4")
-axis(2, as.numeric(values), values)
+print(
+  ggplot(specs, aes(x=Date, y=Storage)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(0.03, 4),
+                  breaks=c(0.05, 0.1, 0.2, 0.5, 1, 2, 4)) +
+    labs(title="Laptop: Storage drive", x=NULL, y="Storage (TB)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("laptop_thick")
-plot(Height~Date, specs, ylim=lim(Height), pch=21, bg=bg, yaxs="i",
-     main="Laptop: Thickness", ylab="Height (cm)")
+print(
+  ggplot(specs, aes(x=Date, y=Height)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_continuous(limits=lim(specs$Height),
+                       expand=expansion(mult=0)) +
+    labs(title="Laptop: Thickness", x=NULL, y="Height (cm)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("laptop_weight")
-plot(Weight~Date, specs, ylim=lim(Weight), pch=21, bg=bg,
-     main="Laptop: Weight", ylab="Weight (kg)")
+print(
+  ggplot(specs, aes(x=Date, y=Weight)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    labs(title="Laptop: Weight", x=NULL, y="Weight (kg)") +
+    themeLaptops()
+)
 dev.off()
 
 # Plot screen variables
 taf.png("screen_density")
-plot(ppi~Date, specs, log="y", pch=21, bg=bg, ylim=c(80, 300),
-     main="Laptop: Pixel density", ylab="Density (PPI)")
+print(
+  ggplot(specs, aes(x=Date, y=ppi)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(80, 300)) +
+    labs(title="Laptop: Pixel density", x=NULL, y="Density (PPI)") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("screen_pixels")
-plot(h~Date, specs, log="y", pch=21, bg=bg, yaxt="n", ylim=c(720, 2550),
-     main="Laptop: Screen resolution", ylab="Vertical pixels")
-axis(2, c(768, 1080, 1440, 2400))
+print(
+  ggplot(specs, aes(x=Date, y=h)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_log10(limits=c(720, 2550), breaks=c(768, 1080, 1440, 2400)) +
+    labs(title="Laptop: Screen resolution", x=NULL, y="Vertical pixels") +
+    themeLaptops()
+)
 dev.off()
 
 # Relationship between variables
 taf.png("storage_memory_prop")
 specs$Percentage <- specs$RAM / (1000*specs$Storage)
-plot(Percentage~Date, specs, pch=21, bg=bg, ylim=lim(Percentage, 1.15),
-     main="Memory tends to be around 2% of storage", ylab="Memory / Storage")
+print(
+  ggplot(specs, aes(x=Date, y=Percentage)) +
+    geomLaptopPoints() +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    coord_cartesian(ylim=lim(specs$Percentage, 1.15)) +
+    labs(title="Memory tends to be around 2% of storage", x=NULL,
+         y="Memory / Storage") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("storage_memory_text")
 specs$Percentage <- specs$RAM / (1000*specs$Storage)
-plot(Percentage~Date, specs, pch=21, bg=bg, ylim=lim(Percentage, 1.15),
-     main="Memory tends to be around 2% of storage", ylab="Memory / Storage")
-abline(h=0.02, lty=3)
 n <- nrow(specs)
-text(specs$Date[1]+130, specs$Percentage[1]+0.004, "512 MB\nRAM", cex=0.9,
-     col="darkgray")
-text(specs$Date[1]+120, specs$Percentage[1]-0.004, "40 GB\nHDD", cex=0.9,
-     col="darkgray")
-text(specs$Date[2], specs$Percentage[2]+0.004, "4 GB\nRAM", cex=0.9,
-     col="darkgray")
-text(specs$Date[2], specs$Percentage[2]-0.004, "100 GB\nHDD", cex=0.9,
-     col="darkgray")
-text(specs$Date[n]-80, specs$Percentage[n]+0.004, "64 GB\nRAM", cex=0.9,
-     col="darkgray")
-text(specs$Date[n]-30, specs$Percentage[n]-0.004, "2 TB\nSSD", cex=0.9,
-     col="darkgray")
+storage.labels <- data.frame(
+  Date=c(specs$Date[1]+130, specs$Date[1]+120, specs$Date[2], specs$Date[2],
+         specs$Date[n]-80, specs$Date[n]-30),
+  Percentage=c(specs$Percentage[1]+0.004, specs$Percentage[1]-0.004,
+               specs$Percentage[2]+0.004, specs$Percentage[2]-0.004,
+               specs$Percentage[n]+0.004, specs$Percentage[n]-0.004),
+  label=c(paste("512 MB", "RAM", sep="\n"),
+          paste("40 GB", "HDD", sep="\n"),
+          paste("4 GB", "RAM", sep="\n"),
+          paste("100 GB", "HDD", sep="\n"),
+          paste("64 GB", "RAM", sep="\n"),
+          paste("2 TB", "SSD", sep="\n"))
+)
+print(
+  ggplot(specs, aes(x=Date, y=Percentage)) +
+    geomLaptopPoints() +
+    geom_hline(yintercept=0.02, linetype=3, color="#D55E00") +
+    geom_text(data=storage.labels,
+              aes(x=Date, y=Percentage, label=label),
+              inherit.aes=FALSE, color="grey35", size=3.2) +
+    scaleLaptopFill() +
+    scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    coord_cartesian(ylim=lim(specs$Percentage, 1.15)) +
+    labs(title="Memory tends to be around 2% of storage", x=NULL,
+         y="Memory / Storage") +
+    themeLaptops()
+)
 dev.off()
 
 taf.png("thick_watt")
-plot(W~Height, specs, pch=21, bg=bg,
-     main="Processor power and laptop thickness", xlab="Thickness (cm)",
-     ylab="Thermal design power (W)")
-abline(lm(W~Height, specs))
 p1gen8 <- specs[specs$Laptop == "Lenovo-P1-Gen8",]
 t61 <- specs[specs$Laptop == "Lenovo-ThinkPad-T61",]
-text(p1gen8$Height, p1gen8$W+6, "new\npremium\naluminium", cex=0.9,
-     col="darkgray")
-text(t61$Height, t61$W-6, "old\nworkstation\nplastic", cex=0.9, col="darkgray")
+thickness.labels <- rbind(
+  data.frame(Height=p1gen8$Height, W=p1gen8$W+6,
+             label=paste("new", "premium", "aluminium", sep="\n")),
+  data.frame(Height=t61$Height, W=t61$W-6,
+             label=paste("old", "workstation", "plastic", sep="\n"))
+)
+print(
+  ggplot(specs, aes(x=Height, y=W)) +
+    geomLaptopPoints() +
+    geom_smooth(method="lm", formula=y~x, se=FALSE,
+                color="#D55E00", linewidth=0.7) +
+    geom_text(data=thickness.labels,
+              aes(x=Height, y=W, label=label),
+              inherit.aes=FALSE, color="grey35", size=3.2) +
+    scaleLaptopFill() +
+    labs(title="Processor power and laptop thickness",
+         x="Thickness (cm)", y="Thermal design power (W)") +
+    themeLaptops()
+)
 dev.off()
 
 # Format specs
