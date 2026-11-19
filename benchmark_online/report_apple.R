@@ -87,7 +87,7 @@ print(
     scale_color_manual(values=c(Pro=benchmark.colors[["Apple"]],
                                 Air=benchmark.colors[["Apple"]])) +
     scale_shape_manual(values=c(Pro=16, Air=1)) +
-    scale_x_date(limits=as.Date(c("2020-01-01", "2027-01-01")),
+    scale_x_date(limits=as.Date(c("2019-10-01", "2026-10-01")),
                  date_breaks="1 year", date_labels="%Y",
                  expand=expansion(mult=0)) +
     scale_y_log10(breaks=c(3500, 4000, 4500, 5000, 5500, 6000)) +

@@ -7,7 +7,7 @@ themeBenchmark <- function()
                      margin=ggplot2::margin(t=12)),
                    axis.title.y=ggplot2::element_text(
                      margin=ggplot2::margin(r=12)),
-                   axis.text.y=ggplot2::element_text(angle=90, hjust=0.5,
+                   axis.text.y=ggplot2::element_text(angle=0, hjust=0.5,
                                                      vjust=0.5),
                    panel.grid.major.x=ggplot2::element_line(
                      color="grey85", linewidth=0.3),

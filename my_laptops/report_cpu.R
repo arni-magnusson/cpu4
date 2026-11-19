@@ -59,7 +59,7 @@ print(
     geomLaptopPoints() +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
-    scale_y_log10(limits=c(2, 6)) +
+    scale_y_log10(limits=c(2, 6), breaks=c(2, 3, 4, 5)) +
     labs(title="CPU: Maximum frequency", x=NULL, y="Turbo (GHz)") +
     themeLaptops()
 )
@@ -84,7 +84,7 @@ print(
     geomLaptopPoints() +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
-    scale_y_log10(limits=c(350, 5000)) +
+    scale_y_log10(limits=c(350, 5000), breaks=c(500, 1000, 2000, 4000)) +
     labs(title="CPU: Benchmark performance", x=NULL,
          y="Score (PassMark single thread)") +
     themeLaptops()
@@ -99,7 +99,7 @@ print(
     geomLaptopPoints() +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
-    scale_y_log10(limits=c(350, 5000)) +
+    scale_y_log10(limits=c(350, 5000), breaks=c(500, 1000, 2000, 4000)) +
     labs(title="CPU: Performance trend", x=NULL,
          y="Score (PassMark single thread)") +
     themeLaptops()
@@ -141,7 +141,7 @@ print(
     geomLaptopPoints() +
     scaleLaptopFill() +
     scale_x_log10() +
-    scale_y_log10(limits=c(350, 5000)) +
+    scale_y_log10(limits=c(350, 5000), breaks=c(500, 1000, 2000, 4000)) +
     labs(title="CPU: Frequency and performance", x="Turbo (GHz)",
          y="Score (PassMark single thread)") +
     themeLaptops()
@@ -153,7 +153,7 @@ print(
   ggplot(specs, aes(x=sqrt(nm), y=Speed)) +
     geomLaptopPoints() +
     scaleLaptopFill() +
-    scale_y_log10(limits=c(350, 5000)) +
+    scale_y_log10(limits=c(350, 5000), breaks=c(500, 1000, 2000, 4000)) +
     labs(title="CPU: Performance and semiconductor technology",
          x="sqrt(Process node)", y="Score (PassMark single thread)") +
     themeLaptops()

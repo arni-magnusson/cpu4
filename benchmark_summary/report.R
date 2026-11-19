@@ -98,7 +98,7 @@ print(
          x="Synthetic benchmark score",
          y="Actual speed (model iterations / sec)") +
     themeBenchmark() +
-    theme(axis.text.y=element_text(angle=90, hjust=0.5, vjust=0.5))
+    theme(axis.text.y=element_text(angle=0, hjust=0.5, vjust=0.5))
 )
 dev.off()
 

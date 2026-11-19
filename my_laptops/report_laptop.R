@@ -88,6 +88,8 @@ print(
     geomLaptopPoints() +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
+    scale_y_continuous(limits=c(0, NA), breaks=0:4,
+                       expand=expansion(mult=c(0, 0.1))) +
     labs(title="Laptop: Weight", x=NULL, y="Weight (kg)") +
     themeLaptops()
 )
@@ -100,7 +102,7 @@ print(
     geomLaptopPoints() +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
-    scale_y_log10(limits=c(80, 300)) +
+    scale_y_log10(limits=c(80, 300), breaks=c(100, 150, 200, 300)) +
     labs(title="Laptop: Pixel density", x=NULL, y="Density (PPI)") +
     themeLaptops()
 )
@@ -152,10 +154,11 @@ storage.labels <- data.frame(
 print(
   ggplot(specs, aes(x=Date, y=Percentage)) +
     geomLaptopPoints() +
-    geom_hline(yintercept=0.02, linetype=3, color="#D55E00") +
+    geom_hline(yintercept=0.02, linetype="dashed", color="#D55E00",
+               linewidth=0.8) +
     geom_text(data=storage.labels,
               aes(x=Date, y=Percentage, label=label),
-              inherit.aes=FALSE, color="grey35", size=3.0, hjust=0.5,
+              inherit.aes=FALSE, color="grey35", size=2.8, hjust=0.5,
               lineheight=1.1) +
     scaleLaptopFill() +
     scale_x_date(date_breaks="5 years", date_labels="%Y") +
@@ -182,7 +185,7 @@ print(
     geomLaptopPoints() +
     geom_text(data=thickness.labels,
               aes(x=Height, y=W, label=label),
-              inherit.aes=FALSE, color="grey35", size=3.2) +
+              inherit.aes=FALSE, color="grey35", size=3.0) +
     scaleLaptopFill() +
     labs(title="Processor power and laptop thickness",
          x="Thickness (cm)", y="Thermal design power (W)") +

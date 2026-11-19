@@ -37,7 +37,7 @@ themeCPUMon <- function()
                                   margin=margin(b=12)),
           axis.title.x=element_text(margin=margin(t=12)),
           axis.title.y=element_text(margin=margin(r=12)),
-          axis.text.y=element_text(angle=90, hjust=0.5, vjust=0.5),
+          axis.text.y=element_text(angle=0, hjust=0.5, vjust=0.5),
           panel.grid.major=element_line(color="grey85", linewidth=0.3),
           panel.grid.minor=element_blank(),
           panel.spacing.x=grid::unit(0.6, "cm"),
@@ -55,6 +55,8 @@ sensor_data <- function(machines)
       {
         value <- machines[[machine]][[state]][[paste0(variable, "1")]]
         if(variable == "Freq")
+          value <- value / 1000
+        if(variable == "Fan")
           value <- value / 1000
         data[[length(data)+1]] <- data.frame(
           iteration=seq_along(value),
@@ -93,7 +95,7 @@ plot_comparison <- function(machines)
                  variable=as_labeller(c(
                    Freq="Frequency (GHz)",
                    Temp="Temperature (\u02DAC)",
-                   Fan="Fan (rpm)"
+                   Fan="Fan (1000 rpm)"
                  )),
                  state=as_labeller(c(
                    idle="Idle",
@@ -173,7 +175,7 @@ plot_each <- function(machines)
                  variable=as_labeller(c(
                    Freq="Frequency (GHz)",
                    Temp="Temperature (\u02DAC)",
-                   Fan="Fan (rpm)"
+                   Fan="Fan (1000 rpm)"
                  )),
                  machine=as_labeller(processor.labels)
                )) +

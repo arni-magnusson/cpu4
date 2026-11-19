@@ -60,7 +60,7 @@ themeCPUMon <- function()
                                   margin=margin(b=12)),
           axis.title.x=element_text(margin=margin(t=12)),
           axis.title.y=element_text(margin=margin(r=12)),
-          axis.text.y=element_text(angle=90, hjust=0.5, vjust=0.5),
+          axis.text.y=element_text(angle=0, hjust=0.5, vjust=0.5),
           panel.grid.major=element_line(color="grey85", linewidth=0.3),
           panel.grid.minor=element_blank(),
           panel.spacing.x=grid::unit(0.6, "cm"),

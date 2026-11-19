@@ -16,10 +16,11 @@ themeLaptops <- function()
                      margin=ggplot2::margin(t=12)),
                    axis.title.y=ggplot2::element_text(
                      margin=ggplot2::margin(r=12)),
-                   axis.text.y=ggplot2::element_text(angle=90,
+                   axis.text.y=ggplot2::element_text(angle=0,
                                                      vjust=0.5,
                                                      hjust=0.5),
-                   panel.grid.major.x=ggplot2::element_blank(),
+                   panel.grid.major.x=ggplot2::element_line(
+                     color="grey85", linewidth=0.3),
                    panel.grid.major.y=ggplot2::element_line(
                      color="grey85", linewidth=0.3),
                    panel.grid.minor=ggplot2::element_blank(),
